@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{styles/styles.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Page</title>
+</head>
+<body>
+<div class="container">
+    <h1>Error</h1>
+    <p th:text="${errorMessage}"></p>
+    <a th:href="@{/formatter}" class="my_button">Go to Formatter</a>
+</div>
+</body>
+</html>
