@@ -21,6 +21,7 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'com.google.googlejavaformat:google-java-format:1.22.0'
+	implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 tasks.named('test') {

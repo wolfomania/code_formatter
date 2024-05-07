@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 @Repository
 public class CodeRepository {
 
-    private final String FILENAME = "codes.dat";
+    private static final String FILE_NAME = "codes.json";
 
     private Map<String, SavedCode> codes;
 
@@ -32,9 +32,12 @@ public class CodeRepository {
     }
 
     public void addCode(SavedCode savedCode) {
-        codes.computeIfPresent(savedCode.getId(), (s, savedCode1) -> {
+        codes.computeIfPresent(
+                savedCode.getId(),
+                (s, savedCode1) -> {
             throw new IllegalArgumentException("Code under key \"" + s + "\" already exists");
-        });
+        }
+        );
         codes.put(savedCode.getId(), savedCode);
         scheduledExecutorService.schedule(
                 () -> removeCode(savedCode.getId()),
@@ -53,7 +56,7 @@ public class CodeRepository {
     }
 
     private void serializeData() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILENAME))){
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))){
             oos.writeObject(codes);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -61,7 +64,7 @@ public class CodeRepository {
     }
 
     private void deserializeData() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILENAME))){
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))){
             codes = (HashMap<String, SavedCode>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             codes = new HashMap<>();

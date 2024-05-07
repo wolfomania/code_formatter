@@ -8,11 +8,12 @@ import pl.edu.pja.tpo07.models.SavedCode;
 import pl.edu.pja.tpo07.repository.CodeRepository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class FormatterService {
 
-    private Formatter formatter;
+    private final Formatter formatter;
 
     private final CodeRepository codeRepository;
 
@@ -33,8 +34,8 @@ public class FormatterService {
         codeRepository.addCode(savedCode);
     }
 
-    public SavedCode getCode(String code) {
-        return codeRepository.getCode(code);
+    public Optional<SavedCode> getCode(String code) {
+        return Optional.ofNullable(codeRepository.getCode(code));
     }
 
     private LocalDateTime getExpirationDate(FormattedCodeDTO code) {

@@ -6,13 +6,13 @@ public class FormattedCodeDTO {
 
     private String id;
 
-    private int seconds;
+    private final int seconds;
 
-    private int minutes;
+    private final int minutes;
 
-    private int hours;
+    private final int hours;
 
-    private int days;
+    private final int days;
 
     public FormattedCodeDTO(String code, String id, int seconds, int minutes, int hours, int days) {
         this.code = code;
@@ -51,5 +51,8 @@ public class FormattedCodeDTO {
         return days;
     }
 
+    public void stripId() {
+        id = id.strip();
+    }
 
 }

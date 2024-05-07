@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 public class SavedCode implements Serializable {
 
-    private String id;
+    private final String id;
 
     private String code;
 

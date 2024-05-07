@@ -13,7 +13,8 @@
             <label for="savedCode"></label>
             <textarea class="form-control" id="savedCode" rows="10" th:text="${formattedCode}" readonly></textarea>
         </div>
-        <a th:href="@{/formatter}" class="my_button">Go to Formatter</a>
+        <span th:text="'Expiration time: ' + ${expirationDate}" class="row"></span>
+        <a th:href="@{/}" class="my_button row">Go to Formatter</a>
     </div>
 </body>
 </html>

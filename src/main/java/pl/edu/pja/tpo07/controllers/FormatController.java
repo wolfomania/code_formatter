@@ -5,9 +5,14 @@
     import org.springframework.ui.Model;
     import org.springframework.web.bind.annotation.*;
     import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+    import org.springframework.web.servlet.view.RedirectView;
+    import pl.edu.pja.tpo07.exceptions.MyResourceNotFoundException;
     import pl.edu.pja.tpo07.models.FormattedCodeDTO;
     import pl.edu.pja.tpo07.models.SavedCode;
     import pl.edu.pja.tpo07.services.FormatterService;
+
+    import java.time.format.DateTimeFormatter;
+    import java.util.Optional;
 
     @Controller
     public class FormatController {
@@ -18,54 +23,48 @@
             this.formatterService = formatterService;
         }
 
-        @GetMapping("/formatter")
-        public String format(
-                @RequestParam(required = false) String errorMessage,
-                Model model
-        ) {
-            if (errorMessage != null) {
-                model.addAttribute("errorMessage", errorMessage);
-                return "errorPage";
-            }
+        @GetMapping("/")
+        public String format() {
             return "mainPage";
         }
 
+        @GetMapping("/error-page")
+        public String errorPage(@RequestParam String errorMessage, Model model) {
+            model.addAttribute("errorMessage", errorMessage);
+            return "errorPage";
+        }
+
         @PostMapping("/formatCode")
-        public String formatCode(String codeToFormat, RedirectAttributes redirectAttributes) throws FormatterException {
+        public RedirectView formatCode(String codeToFormat, RedirectAttributes redirectAttributes) throws FormatterException {
             redirectAttributes.addFlashAttribute("formattedCode", formatterService.format(codeToFormat));
-            return "redirect:/formatter";
+            return new RedirectView("/", true, false);
         }
 
         @PostMapping("/saveCode")
-        public String saveCode(@ModelAttribute FormattedCodeDTO formattedCodeDTO, Model model) {
+        public RedirectView saveCode(@ModelAttribute FormattedCodeDTO formattedCodeDTO) {
             long expireIn = formattedCodeDTO.getSeconds()
                     + formattedCodeDTO.getMinutes() * 60L
                     + formattedCodeDTO.getHours() * 60 * 60L
                     + formattedCodeDTO.getDays() * 60 * 60 * 24L;
             if (expireIn < 10 || expireIn > 60 * 60 * 24 * 90)
                 throw new IllegalArgumentException("Expire time must be between 10 seconds and 90 days");
+            formattedCodeDTO.stripId();
             formatterService.saveCode(formattedCodeDTO);
-            model.addAttribute("formattedCode", formattedCodeDTO.getCode());
-            return "redirect:/formatter/" + formattedCodeDTO.getId();
+            return new RedirectView("/" + formattedCodeDTO.getId(), true, false);
         }
 
-        @GetMapping("/formatter/{id}")
+        @GetMapping("/{id}")
         public String formatter(@PathVariable("id") String id, Model model) {
-            SavedCode savedCode = formatterService.getCode(id);
-            if (savedCode == null)
-                throw new NullPointerException("Code snippet not found");
-            model.addAttribute("formattedCode", formatterService.getCode(id).getCode());
+
+            Optional<SavedCode> code = formatterService.getCode(id.strip());
+
+            if (code.isEmpty())
+                throw new MyResourceNotFoundException("Code snippet not found");
+            SavedCode savedCode = code.get();
+            model.addAttribute("formattedCode", savedCode.getCode());
+            String expirationTime = savedCode.getExpirationDate().format(DateTimeFormatter.ofPattern("HH:mm:ss yyyy-MM-dd"));
+            model.addAttribute("expirationDate", expirationTime);
             return "savedCode";
         }
 
-        @ExceptionHandler(
-                {
-                        FormatterException.class,
-                        IllegalArgumentException.class,
-                        NullPointerException.class
-                }
-                )
-        public String handleFormatterException(Exception e) {
-            return "redirect:/formatter?errorMessage=" + e.getMessage();
-        }
     }
