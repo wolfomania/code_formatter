@@ -1,12 +1,14 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
+    /*font-family: Arial, sans-serif;*/
+    /*margin: 0;*/
+    /*padding: 0;*/
+    /*display: flex;*/
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    /*text-align: center;*/
+    /*height: 100vh;*/
     background-color: #f5f5f5;
+    text-align: center;
 }
 
 .container {
@@ -40,4 +42,16 @@ p {
 
 .my_button:hover {
     background-color: #0022a6;
+}
+
+footer {
+    text-align: center;
+    align-items: center;
+    bottom: 0;
+    width: 100%;
+}
+
+.expiration_span {
+    text-align: center;
+    align-items: center;
 }

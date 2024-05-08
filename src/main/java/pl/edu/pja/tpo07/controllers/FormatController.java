@@ -67,4 +67,9 @@
             return "savedCode";
         }
 
+        @PostMapping("/")
+        public RedirectView getCode(String id) {
+            return new RedirectView("/" + id, true, false);
+        }
+
     }
