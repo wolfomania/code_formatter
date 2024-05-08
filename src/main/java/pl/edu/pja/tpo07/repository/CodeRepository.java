@@ -1,6 +1,10 @@
 package pl.edu.pja.tpo07.repository;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Repository;
+import pl.edu.pja.tpo07.json.adapters.LocalDateTimeAdapter;
 import pl.edu.pja.tpo07.models.SavedCode;
 
 import java.io.*;
@@ -21,7 +25,13 @@ public class CodeRepository {
 
     private final ScheduledExecutorService scheduledExecutorService;
 
+    private final Gson gson;
+
     public CodeRepository() {
+        gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
         deserializeData();
         scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
         scheduleCodeExpiration();
@@ -56,19 +66,24 @@ public class CodeRepository {
     }
 
     private void serializeData() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))){
-            oos.writeObject(codes);
+        try (Writer writer = new FileWriter(FILE_NAME)){
+            gson.toJson(codes, writer);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private void deserializeData() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))){
-            codes = (HashMap<String, SavedCode>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        File file = new File(FILE_NAME);
+        if (!file.exists() || file.length() == 0)
             codes = new HashMap<>();
-        }
+        else
+            try (Reader reader = new FileReader(file)){
+                codes = gson.fromJson(
+                        reader,
+                        new TypeToken<HashMap<String, SavedCode>>(){}.getType()
+                );
+            } catch (IOException ignore) {}
     }
 
     private void scheduleCodeExpiration() {

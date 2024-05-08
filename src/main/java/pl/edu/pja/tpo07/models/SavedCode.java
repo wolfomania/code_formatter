@@ -1,9 +1,8 @@
 package pl.edu.pja.tpo07.models;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class SavedCode implements Serializable {
+public class SavedCode {
 
     private final String id;
 
