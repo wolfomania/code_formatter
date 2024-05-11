@@ -39,10 +39,6 @@ public class FormatterService {
     }
 
     private LocalDateTime getExpirationDate(FormattedCodeDTO code) {
-        return LocalDateTime.now()
-                .plusDays(code.getDays())
-                .plusHours(code.getHours())
-                .plusMinutes(code.getMinutes())
-                .plusSeconds(code.getSeconds());
+        return LocalDateTime.now().plusSeconds(code.getExpireInSeconds());
     }
 }

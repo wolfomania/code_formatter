@@ -6,13 +6,13 @@
     import org.springframework.web.bind.annotation.*;
     import org.springframework.web.servlet.mvc.support.RedirectAttributes;
     import org.springframework.web.servlet.view.RedirectView;
+    import pl.edu.pja.tpo07.exceptions.InvalidExpireTimeException;
     import pl.edu.pja.tpo07.exceptions.MyResourceNotFoundException;
     import pl.edu.pja.tpo07.models.FormattedCodeDTO;
     import pl.edu.pja.tpo07.models.SavedCode;
     import pl.edu.pja.tpo07.services.FormatterService;
 
     import java.time.format.DateTimeFormatter;
-    import java.util.Optional;
 
     @Controller
     public class FormatController {
@@ -42,12 +42,9 @@
 
         @PostMapping("/saveCode")
         public RedirectView saveCode(@ModelAttribute FormattedCodeDTO formattedCodeDTO) {
-            long expireIn = formattedCodeDTO.getSeconds()
-                    + formattedCodeDTO.getMinutes() * 60L
-                    + formattedCodeDTO.getHours() * 60 * 60L
-                    + formattedCodeDTO.getDays() * 60 * 60 * 24L;
+            long expireIn = formattedCodeDTO.getExpireInSeconds();
             if (expireIn < 10 || expireIn > 60 * 60 * 24 * 90)
-                throw new IllegalArgumentException("Expire time must be between 10 seconds and 90 days");
+                throw new InvalidExpireTimeException("Expire time must be between 10 seconds and 90 days");
             formattedCodeDTO.stripId();
             formatterService.saveCode(formattedCodeDTO);
             return new RedirectView("/" + formattedCodeDTO.getId(), true, false);
@@ -56,11 +53,8 @@
         @GetMapping("/{id}")
         public String formatter(@PathVariable("id") String id, Model model) {
 
-            Optional<SavedCode> code = formatterService.getCode(id.strip());
-
-            if (code.isEmpty())
-                throw new MyResourceNotFoundException("Code snippet not found");
-            SavedCode savedCode = code.get();
+            SavedCode savedCode = formatterService.getCode(id.strip())
+                    .orElseThrow(() -> new MyResourceNotFoundException("Code snippet not found"));
             model.addAttribute("formattedCode", savedCode.getCode());
             String expirationTime = savedCode.getExpirationDate().format(DateTimeFormatter.ofPattern("HH:mm:ss yyyy-MM-dd"));
             model.addAttribute("expirationDate", expirationTime);

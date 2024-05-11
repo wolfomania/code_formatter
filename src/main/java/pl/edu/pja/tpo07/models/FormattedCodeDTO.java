@@ -23,6 +23,13 @@ public class FormattedCodeDTO {
         this.days = days;
     }
 
+    public long getExpireInSeconds() {
+        return getSeconds()
+                + getMinutes() * 60L
+                + getHours() * 60 * 60L
+                + getDays() * 60 * 60 * 24L;
+    }
+
     public String getCode() {
         return code;
     }
